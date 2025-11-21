@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('https://scapi.elitceler.com/api/v1/admins/login', {
+      const response = await fetch('https://scapi.elitceler.com/api/v1/admins/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Login failed. Please check your credentials.');
+        throw new Error(errorData.message || 'Registration failed. Please try again.');
       }
 
       const data = await response.json();
@@ -45,7 +45,7 @@ export default function LoginPage() {
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
+      setError(err instanceof Error ? err.message : 'An error occurred during registration');
     } finally {
       setLoading(false);
     }
@@ -66,11 +66,11 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-black/50" />
       </div>
 
-      {/* Login Card */}
+      {/* Register Card */}
       <div className="relative z-10 w-full max-w-md bg-white rounded-3xl p-8 md:p-10 shadow-2xl mx-4">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome Back, <span className="text-[#4A148C]">Aleena</span>
+            Create Your <span className="text-[#4A148C]">Account</span>
           </h1>
         </div>
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
             <div className="relative">
               <input
                 type="email"
-                placeholder="Email / Username"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -122,8 +122,8 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-end pt-2">
-            <Link href="#" className="text-xs font-semibold text-[#4A148C] hover:underline">
-              Forgot password
+            <Link href="/login" className="text-xs font-semibold text-[#4A148C] hover:underline">
+              Already have an account?
             </Link>
           </div>
 
@@ -132,7 +132,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-[#2e0d5e] text-white py-2 rounded-lg font-semibold text-lg hover:bg-[#3c117a] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
       </div>
