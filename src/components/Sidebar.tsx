@@ -15,7 +15,10 @@ import {
   AlertCircle,
   Book,
   UserCog,
-  Globe
+  Globe,
+  MapPin,
+  Link as LinkIcon,
+  HeartHandshake
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -33,7 +36,17 @@ const menuItems = [
       { label: 'City & Affiliation Management', href: '/dashboard/volunteers/cities', icon: Globe },
     ]
   },
-  { icon: Wallet, label: 'Donation Management', href: '/dashboard/donations', subItems: [] }, // Added empty array to show chevron if needed or just boolean
+  { 
+    icon: Wallet, 
+    label: 'Donation Management', 
+    href: '/dashboard/donations', 
+    subItems: [
+      { label: 'All Donations', href: '/dashboard/donations', icon: Wallet },
+      { label: 'Volunteer-wise Donations', href: '/dashboard/donations/volunteer-wise', icon: HeartHandshake },
+      { label: 'City-wise Reports', href: '/dashboard/donations/city-wise', icon: MapPin },
+      { label: 'Link / Unlink Donations', href: '/dashboard/donations/link-unlink', icon: LinkIcon },
+    ]
+  },
   { icon: Calendar, label: 'Event management', href: '/dashboard/events' },
   { icon: FileCheck, label: 'Approvals & Governance', href: '/dashboard/approvals' },
   { icon: BarChart3, label: 'Reports & Analytics', href: '/dashboard/reports' },
