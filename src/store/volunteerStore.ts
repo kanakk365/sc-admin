@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useAuthStore } from './authStore';
+import { apiClient } from '@/utils/api';
 
 interface Volunteer {
   id: string;
@@ -52,21 +52,7 @@ export const useVolunteerStore = create<VolunteerState>((set) => ({
   fetchVolunteers: async (page = 1, limit = 10) => {
     set({ isLoading: true, error: null });
     try {
-      const accessToken = useAuthStore.getState().accessToken;
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://scapi.elitceler.com/api/v1'; 
-      const response = await fetch(`${baseURL}/admins/get-volunteer?page=${page}&limit=${limit}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch volunteers');
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get<{ data: Volunteer[]; meta: Meta }>(`/admins/get-volunteer?page=${page}&limit=${limit}`);
       set({ volunteers: data.data, meta: data.meta, isLoading: false });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -75,25 +61,10 @@ export const useVolunteerStore = create<VolunteerState>((set) => ({
   },
   updateVolunteerStatus: async (id: string, status: 'APPROVED' | 'REJECTED') => {
     try {
-      const accessToken = useAuthStore.getState().accessToken;
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://scapi.elitceler.com/api/v1';
-      
-      const response = await fetch(`${baseURL}/admins/volunteer/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          profileStatus: status,
-        }),
+      await apiClient.patch(`/admins/volunteer/${id}/status`, {
+        profileStatus: status,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update volunteer status');
-      }
-
-      // Remove the volunteer from the list after successful update
       set((state) => ({
         volunteers: state.volunteers.filter((v) => v.id !== id),
         meta: state.meta ? {

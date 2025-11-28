@@ -78,7 +78,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md bg-white rounded-3xl p-8 md:p-10 shadow-2xl mx-4">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome Back, <span className="text-[#4A148C]">Aleena</span>
+            Welcome Back
           </h1>
         </div>
 

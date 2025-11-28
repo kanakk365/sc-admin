@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -18,10 +18,13 @@ import {
   Globe,
   MapPin,
   Link as LinkIcon,
-  HeartHandshake
+  HeartHandshake,
+  LogOut
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -56,8 +59,33 @@ const menuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  // Initialize with Volunteer Management expanded for this demo context or based on path
+  const router = useRouter();
+  const email = useAuthStore((state) => state.email);
+  const { clearAuth } = useAuthStore();
   const [expandedMenu, setExpandedMenu] = useState<string | null>('Volunteer Management');
+  const [showLogoutPopover, setShowLogoutPopover] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setShowLogoutPopover(false);
+      }
+    };
+
+    if (showLogoutPopover) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showLogoutPopover]);
+
+  const handleLogout = () => {
+    clearAuth();
+    router.push('/login');
+  };
 
   const toggleMenu = (label: string) => {
     if (expandedMenu === label) {
@@ -76,20 +104,15 @@ export default function Sidebar() {
   return (
     <aside className="w-72 text-white flex flex-col h-screen shrink-0 sticky top-0" style={{ background: 'linear-gradient(180deg, #3D007B 0%, #290959 100%)' }}>
       <div className="p-6 flex-1 overflow-y-auto sidebar-scroll">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-8 h-8 text-white">
-             {/* Simple Hand Icon Placeholder */}
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-               <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/>
-               <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/>
-               <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
-               <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
-             </svg>
-          </div>
-          <div>
-            <div className="font-bold text-lg leading-none">Street<br/>Cause</div>
-            <div className="text-[10px] text-gray-300 font-normal tracking-widest">WE CARE</div>
-          </div>
+        <div className="flex items-center mb-10">
+          <Image
+            src="/logo.png"
+            alt="Street Cause Logo"
+            width={150}
+            height={60}
+            className="object-contain"
+            priority
+          />
         </div>
 
         <nav className="space-y-1">
@@ -143,19 +166,37 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-6 border-t border-white/10">
-        <div className="flex items-center gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-lg -mx-2 transition-colors">
+      <div className="p-6 border-t border-white/10 relative">
+        <div 
+          className="flex items-center gap-3 cursor-pointer hover:bg-white/5 p-2 rounded-lg -mx-2 transition-colors"
+          onClick={() => setShowLogoutPopover(!showLogoutPopover)}
+        >
           <div className="w-10 h-10 rounded-full bg-white text-purple-900 flex items-center justify-center text-lg font-bold">
-            A
+            {email ? email.charAt(0).toUpperCase() : 'A'}
           </div>
           <div className="overflow-hidden">
             <div className="text-xs text-gray-300">Welcome 👋</div>
-            <div className="font-medium truncate">Aleena</div>
+            <div className="font-medium truncate">Welcome</div>
           </div>
-           <svg className="ml-auto w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-           </svg>
+          <svg className="ml-auto w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </div>
+
+        {showLogoutPopover && (
+          <div 
+            ref={popoverRef}
+            className="absolute bottom-20 left-6 right-6 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50"
+          >
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <LogOut size={18} className="text-red-600" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
