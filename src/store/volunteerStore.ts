@@ -41,11 +41,14 @@ interface VolunteerState {
   isLoading: boolean;
   error: string | null;
   fetchVolunteers: (page?: number, limit?: number) => Promise<void>;
-  updateVolunteerStatus: (id: string, status: 'APPROVED' | 'REJECTED') => Promise<boolean>;
+  updateVolunteerStatus: (id: string, status: 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'FROZEN') => Promise<boolean>;
+  selectedVolunteer: Volunteer | null;
+  fetchVolunteerDetails: (id: string) => Promise<void>;
 }
 
 export const useVolunteerStore = create<VolunteerState>((set) => ({
   volunteers: [],
+  selectedVolunteer: null,
   meta: null,
   isLoading: false,
   error: null,
@@ -59,7 +62,7 @@ export const useVolunteerStore = create<VolunteerState>((set) => ({
       set({ error: errorMessage, isLoading: false });
     }
   },
-  updateVolunteerStatus: async (id: string, status: 'APPROVED' | 'REJECTED') => {
+  updateVolunteerStatus: async (id: string, status: 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'FROZEN') => {
     try {
       await apiClient.patch(`/admins/volunteer/${id}/status`, {
         profileStatus: status,
@@ -78,6 +81,16 @@ export const useVolunteerStore = create<VolunteerState>((set) => ({
       const errorMessage = error instanceof Error ? error.message : String(error);
       set({ error: errorMessage });
       return false;
+    }
+  },
+  fetchVolunteerDetails: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await apiClient.get<{ volunteer: Volunteer }>(`/admins/volunteers/${id}`);
+      set({ selectedVolunteer: data.volunteer, isLoading: false });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      set({ error: errorMessage, isLoading: false });
     }
   },
 }));

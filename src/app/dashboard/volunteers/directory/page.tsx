@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Search, Filter, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, Loader2, Eye } from 'lucide-react';
 import { useVolunteerStore } from '@/store/volunteerStore';
+import { useRouter } from 'next/navigation';
 
 export default function VolunteerDirectoryPage() {
   const { volunteers, meta, isLoading, fetchVolunteers } = useVolunteerStore();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'All' | 'Active' | 'Suspended' | 'Frozen'>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -174,6 +176,7 @@ export default function VolunteerDirectoryPage() {
                   <th className="px-6 py-4 text-sm font-medium text-gray-900">Role Applied</th>
                   <th className="px-6 py-4 text-sm font-medium text-gray-900">Date Joined</th>
                   <th className="px-6 py-4 text-sm font-medium text-gray-900">Status</th>
+                  <th className="px-6 py-4 text-sm font-medium text-gray-900">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -189,6 +192,15 @@ export default function VolunteerDirectoryPage() {
                         <div className={`w-2 h-2 rounded-full ${getStatusColor(volunteer.profileStatus)}`}></div>
                         <span className="text-sm text-gray-700">{getStatusLabel(volunteer.profileStatus)}</span>
                       </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <button
+                        onClick={() => router.push(`/dashboard/volunteers/directory/${volunteer.id}`)}
+                        className="p-2 text-gray-500 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <Eye size={18} />
+                      </button>
                     </td>
                   </tr>
                 ))}
