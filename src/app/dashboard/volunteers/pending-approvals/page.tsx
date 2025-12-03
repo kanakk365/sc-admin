@@ -1,22 +1,39 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Search, Filter, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { useVolunteerStore } from '@/store/volunteerStore';
+import React, { useEffect, useState } from "react";
+import {
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Eye,
+} from "lucide-react";
+import { useVolunteerStore } from "@/store/volunteerStore";
+import { useRouter } from "next/navigation";
 
 export default function PendingApprovalsPage() {
-  const { volunteers, meta, isLoading, fetchVolunteers, updateVolunteerStatus } = useVolunteerStore();
+  const {
+    volunteers,
+    meta,
+    isLoading,
+    fetchVolunteers,
+    updateVolunteerStatus,
+  } = useVolunteerStore();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Filter to show only PENDING volunteers
-  const pendingVolunteers = volunteers.filter(v => v.profileStatus === 'PENDING');
+  const pendingVolunteers = volunteers.filter(
+    (v) => v.profileStatus === "PENDING"
+  );
 
   // Filter by search query
-  const filteredVolunteers = pendingVolunteers.filter(volunteer => {
+  const filteredVolunteers = pendingVolunteers.filter((volunteer) => {
     if (!searchQuery.trim()) return true;
-    
+
     const query = searchQuery.toLowerCase().trim();
     return (
       volunteer.fullName.toLowerCase().includes(query) ||
@@ -38,11 +55,14 @@ export default function PendingApprovalsPage() {
     }
   };
 
-  const handleStatusUpdate = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+  const handleStatusUpdate = async (
+    id: string,
+    status: "APPROVED" | "REJECTED"
+  ) => {
     setProcessingId(id);
     const success = await updateVolunteerStatus(id, status);
     setProcessingId(null);
-    
+
     if (success) {
       // Refresh the list to get updated data
       await fetchVolunteers(page, 10);
@@ -55,19 +75,26 @@ export default function PendingApprovalsPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-gray-900">Pending Approvals</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Pending Approvals
+            </h1>
             <span className="px-3 py-1 bg-[#FDB022] text-black text-xs font-semibold rounded-full">
-              {searchQuery ? filteredVolunteers.length : pendingVolunteers.length} Pending
+              {searchQuery
+                ? filteredVolunteers.length
+                : pendingVolunteers.length}{" "}
+              Pending
             </span>
           </div>
-          <p className="text-gray-500">Review and approve new volunteer registrations</p>
+          <p className="text-gray-500">
+            Review and approve new volunteer registrations
+          </p>
         </div>
         <div className="flex gap-3">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input 
-              type="text" 
-              placeholder="Search" 
+            <input
+              type="text"
+              placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-purple-500"
@@ -91,52 +118,92 @@ export default function PendingApprovalsPage() {
             <table className="w-full">
               <thead className="bg-[#EAEBF0] text-left rounded-xl">
                 <tr className="bg-[#EAEBF0] text-left rounded-xl">
-                  <th className="px-6 py-4 text-sm font-medium text-gray-900">Name</th>
-                  <th className="px-6 py-4 text-sm font-medium text-gray-900">Phone no.</th>
-                  <th className="px-6 py-4 text-sm font-medium text-gray-900">City / Division</th>
-                  <th className="px-6 py-4 text-sm font-medium text-gray-900">Role Applied</th>
-                  <th className="px-6 py-4 text-sm font-medium text-gray-900">Action</th>
+                  <th className="px-6 py-4 text-sm font-medium text-gray-900">
+                    Name
+                  </th>
+                  <th className="px-6 py-4 text-sm font-medium text-gray-900">
+                    Phone no.
+                  </th>
+                  <th className="px-6 py-4 text-sm font-medium text-gray-900">
+                    City / Division
+                  </th>
+                  <th className="px-6 py-4 text-sm font-medium text-gray-900">
+                    Role Applied
+                  </th>
+                  <th className="px-6 py-4 text-sm font-medium text-gray-900">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredVolunteers.map((volunteer) => (
                   <tr key={volunteer.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-5 text-sm text-gray-500">{volunteer.fullName}</td>
-                    <td className="px-6 py-5 text-sm text-gray-500">{volunteer.phoneNumber}</td>
-                    <td className="px-6 py-5 text-sm text-gray-500">{volunteer.city} - {volunteer.division}</td>
-                    <td className="px-6 py-5 text-sm text-gray-500">{volunteer.role}</td>
+                    <td className="px-6 py-5 text-sm text-gray-500">
+                      {volunteer.fullName}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-gray-500">
+                      {volunteer.phoneNumber}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-gray-500">
+                      {volunteer.city} - {volunteer.division}
+                    </td>
+                    <td className="px-6 py-5 text-sm text-gray-500">
+                      {volunteer.role}
+                    </td>
                     <td className="px-6 py-5">
-                      <div className="flex gap-3">
-                        <button 
-                          onClick={() => handleStatusUpdate(volunteer.id, 'APPROVED')}
-                          disabled={processingId === volunteer.id}
-                          className="px-2 py-1.5 cursor-pointer bg-[#08a83e] text-white text-xs font-medium rounded-xl hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {processingId === volunteer.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin inline" />
-                          ) : (
-                            'Approve'
-                          )}
-                        </button>
-                        <button 
-                          onClick={() => handleStatusUpdate(volunteer.id, 'REJECTED')}
-                          disabled={processingId === volunteer.id}
-                          className="px-2 py-1.5 cursor-pointer bg-[#d70404] text-white text-xs font-medium rounded-xl hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {processingId === volunteer.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin inline" />
-                          ) : (
-                            'Reject'
-                          )}
-                        </button>
+                      <div className="flex items-center gap-3">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(volunteer.id, "APPROVED")
+                            }
+                            disabled={processingId === volunteer.id}
+                            className="px-2 py-1.5 cursor-pointer bg-[#08a83e] text-white text-xs font-medium rounded-xl hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {processingId === volunteer.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin inline" />
+                            ) : (
+                              "Approve"
+                            )}
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleStatusUpdate(volunteer.id, "REJECTED")
+                            }
+                            disabled={processingId === volunteer.id}
+                            className="px-2 py-1.5 cursor-pointer bg-[#d70404] text-white text-xs font-medium rounded-xl hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {processingId === volunteer.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin inline" />
+                            ) : (
+                              "Reject"
+                            )}
+                          </button>
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/dashboard/volunteers/directory/${volunteer.id}`
+                              )
+                            }
+                            className="p-2 text-gray-500 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={18} />
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filteredVolunteers.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500">
-                      {searchQuery ? 'No volunteers found matching your search.' : 'No pending approvals found.'}
+                    <td
+                      colSpan={5}
+                      className="px-6 py-10 text-center text-gray-500"
+                    >
+                      {searchQuery
+                        ? "No volunteers found matching your search."
+                        : "No pending approvals found."}
                     </td>
                   </tr>
                 )}
@@ -147,17 +214,19 @@ export default function PendingApprovalsPage() {
             {meta && (
               <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
                 <span className="text-sm text-gray-500">
-                  Showing {((meta.page - 1) * meta.limit) + 1} to {Math.min(meta.page * meta.limit, meta.totalItems)} of {meta.totalItems}
+                  Showing {(meta.page - 1) * meta.limit + 1} to{" "}
+                  {Math.min(meta.page * meta.limit, meta.totalItems)} of{" "}
+                  {meta.totalItems}
                 </span>
                 <div className="flex items-center gap-2">
-                  <button 
+                  <button
                     onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
                     className="p-1 px-3 rounded-md bg-[#dad2e3] cursor-pointer text-gray-400 hover:bg-[#cbd5e1] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft size={16} />
                   </button>
-                  <button 
+                  <button
                     onClick={() => handlePageChange(page + 1)}
                     disabled={page === meta.totalPages}
                     className="p-1 px-3 rounded-md bg-[#dad2e3] text-gray-600 cursor-pointer hover:bg-[#cbd5e1] disabled:opacity-50 disabled:cursor-not-allowed"
